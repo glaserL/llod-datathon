@@ -1,0 +1,15 @@
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+DELETE {
+    ?x bibo:editorList ?blank .
+    ?blank ?p_2 ?o_2 .
+}
+INSERT {
+    ?x bibo:editorList ?editorlistnew .
+    ?editorlistnew ?p_2 ?o_2 .
+}
+WHERE {
+    ?x bibo:editorList ?blank .
+    ?blank ?p_2 ?o_2 .
+    BIND(URI(CONCAT(STR(?x),"#editorList")) as ?editorlistnew)
+}

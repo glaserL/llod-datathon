@@ -1,5 +1,6 @@
 import requests
 from SPARQLWrapper import SPARQLWrapper, JSON
+from rdflib import URIRef, OWL
 
 
 class EntryLinker(object):
@@ -50,6 +51,7 @@ class OrganizationLinker(EntryLinker):
         }"""
         res = self.graph.query(get_publisher_names_query)
         publisher_names = set(row[1] for row in res)
+        print(f"Reconciling {len(publisher_names)} publishers..")
         for name in publisher_names:
             self.reconcile_single(name)
 
@@ -65,6 +67,12 @@ WHERE {{
     ?x dct:publisher ?pub . ?pub foaf:name "{name}" ; ?p ?y
 }}"""
         self.graph.update(make_separate_entry_for_publisher_query)
+        final_uri = self.figure_out_correct_link(name)
+        # if nothing works, just make up your own
+        final_uri = "%s%s" % (self.base_uri, name.replace(" ", "_")) if final_uri is None else final_uri
+        print(f"Linking {name} to {final_uri}")
+        self.graph.add((URIRef(pub_uri), OWL.sameAs, URIRef(final_uri)))
+
 
     def fetch_description_from_wikidata(self, wiki_data_urls):
         """
@@ -123,7 +131,6 @@ WHERE {{
         results = dbpedia.query().convert()
         res = results['results']['bindings']
         if len(res) > 0:
-            print(res[0]['same']['value'])
             return res[0]['same']['value']
 
     def figure_out_correct_link(self, name):
@@ -154,4 +161,4 @@ WHERE {{
         if len(results) == 0:
             return self.backup_babelfy(name)
         if len(results) == 1:
-            print("Adding %s." % results[0]["x"]["value"])
+            return results[0]["x"]["value"]

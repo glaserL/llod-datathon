@@ -1,0 +1,10 @@
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+DELETE {
+    ?author a foaf:Person; foaf:givenname ?f ; foaf:surname ?s .
+}
+INSERT {
+    ?author a foaf:Person; foaf:givenName ?f ; foaf:familyName ?s .
+}
+WHERE {
+    ?author a foaf:Person; foaf:givenname ?f ; foaf:surname ?s .
+}
